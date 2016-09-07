@@ -10,21 +10,24 @@ using System.Windows.Forms;
 
 using System.Drawing.Printing;
 
-using Gma.QrCodeNet.Encoding;
-using Gma.QrCodeNet.Encoding.Windows.Render;
 
 using System.IO;
 using System.Drawing.Imaging;
 
 using System.Windows.Media;
-//using System.Windows.Media.Imaging;
+using System.Windows.Media.Imaging;
 
+using Gma.QrCodeNet.Encoding;
+using Gma.QrCodeNet.Encoding.Windows.Render;
 
 namespace PrintTest
 {
     public partial class Form1 : Form
     {
-        PrinterSettings _printersettings;
+        //string _printer_name = "Send To OneNote 2013";
+        //string _printer_name = "Microsoft XPS Document Writer";
+        //string _printer_name = "\\\\APOLLO\\Finance Phil mc5450";
+        string _printer_name = "Brady IP300 Printer";
 
         public Form1()
         {
@@ -33,24 +36,15 @@ namespace PrintTest
 
         private void button1_Click(object sender, EventArgs e)
         {
-            PrintDialog pd = new PrintDialog();
-            pd.PrinterSettings = _printersettings;
-            if (pd.ShowDialog() == DialogResult.OK)
-            {
-                _printersettings = pd.PrinterSettings;
-            }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Font printFont = new Font("Arial", 10);
             PrintDocument pd = new PrintDocument();
+            pd.PrinterSettings.PrinterName = _printer_name;
 
-            //pd.PrinterSettings.PrinterName = "Send To OneNote 2013";
-            pd.PrinterSettings.PrinterName = "Microsoft XPS Document Writer";
-            //pd.PrinterSettings.PrinterName = "\\\\APOLLO\\Finance Phil mc5450";
 
-            pd.PrintPage += pd_PrintPage;
+            pd.PrintPage += pd_PrintPage1;
             if (pd.PrinterSettings.IsValid)
             {
                 pd.Print();
@@ -61,12 +55,12 @@ namespace PrintTest
             }
         }
 
-        void pd_PrintPage(object sender, PrintPageEventArgs e)
+        void pd_PrintPage1(object sender, PrintPageEventArgs e)
         {
             int h = (int)(e.PageSettings.PrintableArea.Height);
             int w = (int)(e.PageSettings.PrintableArea.Width);
 
-            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.L);
+            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.H);
 
             float side = e.PageSettings.PrintableArea.Width;
             //side = 100; //=> 1"
@@ -75,23 +69,22 @@ namespace PrintTest
             float modesize = side / 100 * e.Graphics.DpiX;
 
             QrCode qrCode = qrEncoder.Encode("0123456789");
-            //ISizeCalculation iSizeCal = new FixedModuleSize(3, QuietZoneModules.Zero);
-            ISizeCalculation iSizeCal = new FixedCodeSize( (int)modesize, QuietZoneModules.Zero);
-            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
-            DrawingBrush dBrush = dRenderer.DrawBrush(qrCode.Matrix);
-            MemoryStream mem_stream = new MemoryStream();
-            dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.PNG, mem_stream);
 
+            //ISizeCalculation iSizeCal = new FixedModuleSize(3, QuietZoneModules.Zero);
+            ISizeCalculation iSizeCal = new FixedCodeSize( (int)modesize-16, QuietZoneModules.Zero);
+            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
+
+            //DrawingBrush dBrush = dRenderer.DrawBrush(qrCode.Matrix);
+            
+            MemoryStream mem_stream = new MemoryStream();
+            dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
 
             using (Bitmap bitmap = new Bitmap(mem_stream))
             {
-
-                bitmap.SetResolution(e.Graphics.DpiX, e.Graphics.DpiX);
-
+                bitmap.SetResolution(e.Graphics.DpiX, e.Graphics.DpiY);
                 using (Graphics graphics = Graphics.FromImage(bitmap))
                 {
-
-                    e.Graphics.DrawImage(bitmap, e.Graphics.RenderingOrigin.X, e.Graphics.RenderingOrigin.Y);
+                    e.Graphics.DrawImage(bitmap, e.Graphics.RenderingOrigin.X + 5, 1);
                     //bitmap.Save(mem_stream, ImageFormat.Bmp);
                 }
 
