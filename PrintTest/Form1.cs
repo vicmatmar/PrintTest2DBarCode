@@ -20,14 +20,17 @@ using System.Windows.Media.Imaging;
 using Gma.QrCodeNet.Encoding;
 using Gma.QrCodeNet.Encoding.Windows.Render;
 
+using ThoughtWorks.QRCode.Codec;
+
 namespace PrintTest
 {
     public partial class Form1 : Form
     {
-        //string _printer_name = "Send To OneNote 2013";
+        string _printer_name = "Send To OneNote 2013";
         //string _printer_name = "Microsoft XPS Document Writer";
         //string _printer_name = "\\\\APOLLO\\Finance Phil mc5450";
-        string _printer_name = "Brady IP300 Printer";
+        //string _printer_name = "KONICA MINOLTA mc5450 PS";
+        //string _printer_name = "Brady IP300 Printer";
 
         public Form1()
         {
@@ -36,6 +39,7 @@ namespace PrintTest
 
         private void button1_Click(object sender, EventArgs e)
         {
+            test2();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -60,7 +64,7 @@ namespace PrintTest
             int h = (int)(e.PageSettings.PrintableArea.Height);
             int w = (int)(e.PageSettings.PrintableArea.Width);
 
-            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.H);
+            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.M);
 
             float side = e.PageSettings.PrintableArea.Width;
             //side = 100; //=> 1"
@@ -70,31 +74,60 @@ namespace PrintTest
 
             QrCode qrCode = qrEncoder.Encode("0123456789");
 
-            //ISizeCalculation iSizeCal = new FixedModuleSize(3, QuietZoneModules.Zero);
+
+            //ISizeCalculation iSizeCal = new FixedModuleSize(10, QuietZoneModules.Zero);
+            // This works with the Brady on a very small label
             ISizeCalculation iSizeCal = new FixedCodeSize( (int)modesize-16, QuietZoneModules.Zero);
-            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
 
-            //DrawingBrush dBrush = dRenderer.DrawBrush(qrCode.Matrix);
-            
-            MemoryStream mem_stream = new MemoryStream();
-            dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
+            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, 
+                System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
 
-            using (Bitmap bitmap = new Bitmap(mem_stream))
+            string test = "test1";
+            if (test == "test1")
             {
-                bitmap.SetResolution(e.Graphics.DpiX, e.Graphics.DpiY);
-                using (Graphics graphics = Graphics.FromImage(bitmap))
-                {
-                    e.Graphics.DrawImage(bitmap, e.Graphics.RenderingOrigin.X + 5, 1);
-                    //bitmap.Save(mem_stream, ImageFormat.Bmp);
-                }
+                MemoryStream mem_stream = new MemoryStream();
+                dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
 
+                Bitmap bitmap = new Bitmap(mem_stream);
+                bitmap.SetResolution(e.Graphics.DpiX, e.Graphics.DpiY);
+                //bitmap.SetResolution(10, 10);
+                
+                Graphics graphics = Graphics.FromImage(bitmap);
+                e.Graphics.DrawImage(bitmap, 0, 0);
+            }
+            else
+            {
+                System.Windows.Point dpipoint = new System.Windows.Point(e.Graphics.DpiX, e.Graphics.DpiY);
+                BitmapSource bitmapsource = dRenderer.WriteToBitmapSource(qrCode.Matrix, dpipoint);
+                BitmapFrame bitmapframe = BitmapFrame.Create(bitmapsource);
+
+                BitmapEncoder bitmapencoder = new BmpBitmapEncoder();
+                bitmapencoder.Frames.Add(bitmapframe);
+
+                MemoryStream mem_stream = new MemoryStream();
+                bitmapencoder.Save(mem_stream);
+
+                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(mem_stream);
+                e.Graphics.DrawImage(bitmap, 0, 0);
             }
 
         }
 
+        void test2()
+        {
+            QRCodeEncoder encoder = new QRCodeEncoder();
+            encoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.NUMERIC;
+            encoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
+            encoder.QRCodeBackgroundColor = System.Drawing.Color.Black;
+            encoder.QRCodeForegroundColor = System.Drawing.Color.White;
+            encoder.QRCodeScale = 1;
+
+            Bitmap bitmap = encoder.Encode("1234567890");
+        }
+
         void test1(PrintPageEventArgs e)
         {
-            int x =  Convert.ToInt32(e.PageSettings.PrintableArea.X);
+            int x = Convert.ToInt32(e.PageSettings.PrintableArea.X);
             int y = Convert.ToInt32(e.PageSettings.PrintableArea.Y);
 
             int h = Convert.ToInt32(e.PageSettings.PrintableArea.Height);
@@ -111,7 +144,7 @@ namespace PrintTest
             //ISizeCalculation iSizeCal = new FixedCodeSize(25, QuietZoneModules.Two);
 
 
-            GraphicsRenderer gRenderer = new GraphicsRenderer(iSizeCal, 
+            GraphicsRenderer gRenderer = new GraphicsRenderer(iSizeCal,
                 System.Drawing.Brushes.Black, System.Drawing.Brushes.White);
 
 
@@ -121,14 +154,14 @@ namespace PrintTest
             QrCode qrCode4 = qrEncoder.Encode("ABCDEF1234");
 
 
-            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, 
+            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal,
                 System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
             DrawingBrush dBrush = dRenderer.DrawBrush(qrCode1.Matrix);
-            
+
             int side = w;
             if (w > h)
                 side = h;
-            
+
 
 
             gRenderer.Draw(e.Graphics, qrCode1.Matrix);
@@ -151,6 +184,30 @@ namespace PrintTest
                 gRenderer.WriteToStream(qrCode2.Matrix, ImageFormat.Png, stream);
             }
 
+
+        }
+
+        private void buttonEncode_Click(object sender, EventArgs e)
+        {
+            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.H);
+            QrCode qrCode = qrEncoder.Encode("0123456789");
+
+            ISizeCalculation iSizeCal = new FixedModuleSize(10, QuietZoneModules.Zero);
+            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
+
+            //MemoryStream mem_stream = new MemoryStream();
+            //dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
+            //Bitmap bitmap = new Bitmap(mem_stream);
+
+            BitmapSource bitmapsource = dRenderer.WriteToBitmapSource(qrCode.Matrix, new System.Windows.Point(300, 300));
+            System.Drawing.Bitmap bitmap2;
+            MemoryStream outStream = new MemoryStream();
+            BitmapEncoder bitmapencoder = new BmpBitmapEncoder();
+            BitmapFrame bitmapframe = BitmapFrame.Create(bitmapsource);
+            bitmapencoder.Frames.Add(bitmapframe);
+            bitmapencoder.Save(outStream);
+            bitmap2 = new System.Drawing.Bitmap(outStream);
+            this.pictureBox1.Image = bitmap2;
 
         }
     }
