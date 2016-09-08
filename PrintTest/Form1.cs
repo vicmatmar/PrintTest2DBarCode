@@ -75,9 +75,9 @@ namespace PrintTest
             QrCode qrCode = qrEncoder.Encode("0123456789");
 
 
-            //ISizeCalculation iSizeCal = new FixedModuleSize(10, QuietZoneModules.Zero);
+            ISizeCalculation iSizeCal = new FixedModuleSize(2, QuietZoneModules.Zero);
             // This works with the Brady on a very small label
-            ISizeCalculation iSizeCal = new FixedCodeSize( (int)modesize-16, QuietZoneModules.Zero);
+            //ISizeCalculation iSizeCal = new FixedCodeSize( (int)modesize-16, QuietZoneModules.Zero);
 
             DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, 
                 System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
@@ -189,26 +189,83 @@ namespace PrintTest
 
         private void buttonEncode_Click(object sender, EventArgs e)
         {
-            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.H);
-            QrCode qrCode = qrEncoder.Encode("0123456789");
 
-            ISizeCalculation iSizeCal = new FixedModuleSize(10, QuietZoneModules.Zero);
+            encodeToPictureBox();
+        }
+
+        void encodeToPictureBox()
+        {
+            String data = "012345678901234567890";
+
+            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.M);
+            QrCode qrCode = qrEncoder.Encode(data);
+
+            ISizeCalculation iSizeCal = new FixedCodeSize((int)numericUpDownScale.Value, QuietZoneModules.Zero);
+            if (numericUpDownScale.Value == 0)
+            {
+                // Full screen
+                int side = pictureBox1.Height;
+                //side = 100; //=> 1"
+                if (pictureBox1.Height > pictureBox1.Width)
+                    side = pictureBox1.Width;
+                iSizeCal = new FixedCodeSize(side, QuietZoneModules.Zero);
+            }
+            else
+            {
+
+            }
             DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
 
-            //MemoryStream mem_stream = new MemoryStream();
-            //dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
-            //Bitmap bitmap = new Bitmap(mem_stream);
+            MemoryStream mem_stream = new MemoryStream();
+            dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
+            Bitmap bitmap = new Bitmap(mem_stream);
+            float dpi = (float)numericUpDownDPI.Value;
+            bitmap.SetResolution(dpi, dpi);
 
-            BitmapSource bitmapsource = dRenderer.WriteToBitmapSource(qrCode.Matrix, new System.Windows.Point(300, 300));
-            System.Drawing.Bitmap bitmap2;
-            MemoryStream outStream = new MemoryStream();
-            BitmapEncoder bitmapencoder = new BmpBitmapEncoder();
-            BitmapFrame bitmapframe = BitmapFrame.Create(bitmapsource);
-            bitmapencoder.Frames.Add(bitmapframe);
-            bitmapencoder.Save(outStream);
-            bitmap2 = new System.Drawing.Bitmap(outStream);
-            this.pictureBox1.Image = bitmap2;
+            this.pictureBox1.Image = bitmap;
 
+            // A different way to do the same.  Just incase the bitmap.SetResolution function does not work
+            //System.Windows.Point dpipoint = new System.Windows.Point(300, 300);
+            //BitmapSource bitmapsource = dRenderer.WriteToBitmapSource(qrCode.Matrix, dpipoint);
+            //MemoryStream outStream = new MemoryStream();
+            //BitmapEncoder bitmapencoder = new BmpBitmapEncoder();
+            //BitmapFrame bitmapframe = BitmapFrame.Create(bitmapsource);
+            //bitmapencoder.Frames.Add(bitmapframe);
+            //bitmapencoder.Save(outStream);
+            //Bitmap bitmap2 = new System.Drawing.Bitmap(outStream);
+
+
+            // The other guy encoder
+            QRCodeEncoder qrCodeEncoder = new QRCodeEncoder();
+            qrCodeEncoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.NUMERIC;
+            qrCodeEncoder.QRCodeScale = 5;
+            qrCodeEncoder.QRCodeVersion = 1;
+            qrCodeEncoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
+            Image image = qrCodeEncoder.Encode(data);
+
+
+            this.pictureBox2.Image = image;
+
+        }
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonPrint_Click(object sender, EventArgs e)
+        {
+            printDialog1.Document = printDocument1;
+            DialogResult r = printDialog1.ShowDialog();
+            if (r == DialogResult.OK)
+            {
+                printDocument1.Print();
+            }            
+
+        }
+
+        private void printDocument1_PrintPage(object sender, PrintPageEventArgs e)
+        {
+            e.Graphics.DrawImage(pictureBox1.Image, 0, 0);  
         }
     }
 }
