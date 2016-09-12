@@ -24,6 +24,8 @@ using ThoughtWorks.QRCode.Codec;
 
 using UnitsNet;
 
+using PDF417;
+
 namespace PrintTest
 {
     public partial class Form1 : Form
@@ -34,9 +36,23 @@ namespace PrintTest
         //string _printer_name = "KONICA MINOLTA mc5450 PS";
         //string _printer_name = "Brady IP300 Printer";
 
+        Bitmap _bitmap_for_print;
+        Dictionary<char, Gma.QrCodeNet.Encoding.ErrorCorrectionLevel> _dic_error_correction = new Dictionary<char, ErrorCorrectionLevel>();
+        Dictionary<char, QuietZoneModules> _dic_quite_zone = new Dictionary<char, QuietZoneModules>();
+
         public Form1()
         {
             InitializeComponent();
+
+            _dic_error_correction.Add('L', ErrorCorrectionLevel.L); // 7%
+            _dic_error_correction.Add('Q', ErrorCorrectionLevel.Q); // 25%
+            _dic_error_correction.Add('M', ErrorCorrectionLevel.M); // 15%
+            _dic_error_correction.Add('H', ErrorCorrectionLevel.H); // 30%
+
+            _dic_quite_zone.Add('0', QuietZoneModules.Zero);
+            _dic_quite_zone.Add('2', QuietZoneModules.Two);
+            _dic_quite_zone.Add('4', QuietZoneModules.Four);
+
         }
 
         void test1(PrintPageEventArgs e)
@@ -51,7 +67,7 @@ namespace PrintTest
 
             //e.Graphics.DrawString("This is a test", new Font(FontFamily.GenericSansSerif, 12), Brushes.Blue, new PointF(0, 0));
 
-            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.L);
+            QrEncoder qrEncoder = new QrEncoder(Gma.QrCodeNet.Encoding.ErrorCorrectionLevel.L);
 
 
             ISizeCalculation iSizeCal = new FixedModuleSize(1, QuietZoneModules.Two);
@@ -100,18 +116,13 @@ namespace PrintTest
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            test2();
-        }
-
-        private void button2_Click(object sender, EventArgs e)
+        private void how_to_print_doc(object sender, EventArgs e)
         {
             PrintDocument pd = new PrintDocument();
             pd.PrinterSettings.PrinterName = _printer_name;
 
 
-            pd.PrintPage += pd_PrintPage1;
+            pd.PrintPage += how_to_print_page_handle;
             if (pd.PrinterSettings.IsValid)
             {
                 pd.Print();
@@ -122,7 +133,7 @@ namespace PrintTest
             }
         }
 
-        void pd_PrintPage1(object sender, PrintPageEventArgs e)
+        void how_to_print_page_handle(object sender, PrintPageEventArgs e)
         {
             int h = (int)(e.PageSettings.PrintableArea.Height);
             int w = (int)(e.PageSettings.PrintableArea.Width);
@@ -140,9 +151,9 @@ namespace PrintTest
 
             //ISizeCalculation iSizeCal = new FixedModuleSize(2, QuietZoneModules.Zero);
             // This works with the Brady on a very small label
-            ISizeCalculation iSizeCal = new FixedCodeSize( (int)modesize-16, QuietZoneModules.Zero);
+            ISizeCalculation iSizeCal = new FixedCodeSize((int)modesize - 16, QuietZoneModules.Zero);
 
-            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, 
+            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal,
                 System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
 
             string test = "test1";
@@ -176,14 +187,14 @@ namespace PrintTest
 
         void test2()
         {
-            QRCodeEncoder encoder = new QRCodeEncoder();
-            encoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.NUMERIC;
-            encoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
-            encoder.QRCodeBackgroundColor = System.Drawing.Color.Black;
-            encoder.QRCodeForegroundColor = System.Drawing.Color.White;
-            encoder.QRCodeScale = 1;
-
-            Bitmap bitmap = encoder.Encode("1234567890");
+            // The other guy's encoder
+            QRCodeEncoder qrCodeEncoder = new QRCodeEncoder();
+            qrCodeEncoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.NUMERIC;
+            qrCodeEncoder.QRCodeScale = 1;
+            qrCodeEncoder.QRCodeVersion = 1;
+            qrCodeEncoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
+            Bitmap image = qrCodeEncoder.Encode(textBoxData.Text);
+            this.pictureBox1.Image = image;
         }
 
         private void buttonEncode_Click(object sender, EventArgs e)
@@ -193,9 +204,12 @@ namespace PrintTest
 
         void encodeToPictureBox()
         {
-            String data = "012345678901234567890";
+            String data = textBoxData.Text;
+            ErrorCorrectionLevel correction_level = _dic_error_correction[comboBoxCorrectionLevel.Text[0]];
+            QuietZoneModules quite_zone = _dic_quite_zone[comboBoxQuiteZone.Text[0]];
 
-            QrEncoder qrEncoder = new QrEncoder(ErrorCorrectionLevel.M);
+
+            QrEncoder qrEncoder = new QrEncoder(correction_level);
             QrCode qrCode = qrEncoder.Encode(data);
 
             float dpi = (float)numericUpDownDPI.Value;
@@ -209,33 +223,32 @@ namespace PrintTest
                 //side = 100; //=> 1"
                 if (pictureBox1.Height > pictureBox1.Width)
                     side = pictureBox1.Width;
-                iSizeCal = new FixedCodeSize(side, QuietZoneModules.Zero);
+                iSizeCal = new FixedCodeSize(side, quite_zone);
             }
             else
             {
                 ratio = pdpi / dpi;
                 double dim = (double)numericUpDownSize.Value;
-                if (radioButton_mm.Checked)
+                if (comboBoxSizeUnit.Text == "mm")
                 {
                     dim = Length.FromMillimeters(dim).Inches;
                 }
-                
-                int pixels = (int)(dim * dpi);  // number of pixels
-                iSizeCal = new FixedCodeSize(pixels, QuietZoneModules.Zero);
 
+                int pixels = (int)(dim * dpi);  // number of pixels
+                iSizeCal = new FixedCodeSize(pixels, quite_zone);
             }
-            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, 
+            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal,
                 System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
             MemoryStream mem_stream = new MemoryStream();
             dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
-            Bitmap bitmap = new Bitmap(mem_stream);
-            bitmap.SetResolution(dpi,dpi);
-            
+            _bitmap_for_print = new Bitmap(mem_stream);
+            _bitmap_for_print.SetResolution(dpi, dpi);
+
             //pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-            Bitmap pbitmap = new Bitmap(bitmap, (int)(bitmap.Width * ratio), (int)(bitmap.Height * ratio));
+            Bitmap pbitmap = new Bitmap(_bitmap_for_print, (int)(_bitmap_for_print.Width * ratio), (int)(_bitmap_for_print.Height * ratio));
             this.pictureBox1.Image = pbitmap;
 
-            
+
             // A different way to do the same.  Just incase the bitmap.SetResolution function does not work
             //System.Windows.Point dpipoint = new System.Windows.Point(300, 300);
             //BitmapSource bitmapsource = dRenderer.WriteToBitmapSource(qrCode.Matrix, dpipoint);
@@ -247,17 +260,10 @@ namespace PrintTest
             //Bitmap bitmap2 = new System.Drawing.Bitmap(outStream);
 
 
-            // The other guy encoder
-            QRCodeEncoder qrCodeEncoder = new QRCodeEncoder();
-            qrCodeEncoder.QRCodeEncodeMode = QRCodeEncoder.ENCODE_MODE.NUMERIC;
-            qrCodeEncoder.QRCodeScale = 5;
-            qrCodeEncoder.QRCodeVersion = 1;
-            qrCodeEncoder.QRCodeErrorCorrect = QRCodeEncoder.ERROR_CORRECTION.M;
-            Image image = qrCodeEncoder.Encode(data);
-
-
-            this.pictureBox2.Image = image;
-
+            //PDF417Generator p = new PDF417Generator();
+            //Bitmap bitmap2 = p.GeneratePDF417Code(pictureBox2.Height / 4, pictureBox2.Width / 2, textBoxData.Text);
+            //bitmap2.SetResolution(300,300);
+            //this.pictureBox2.Image = bitmap2;
         }
 
         private void buttonPrint_Click(object sender, EventArgs e)
@@ -268,39 +274,73 @@ namespace PrintTest
             if (r == DialogResult.OK)
             {
                 printDocument1.Print();
-            }            
+            }
 
         }
 
         private void printDocument1_PrintPage(object sender, PrintPageEventArgs e)
         {
-            e.Graphics.DrawImage(pictureBox1.Image, 0, 0);  
+            //e.Graphics.DrawImage(pictureBox1.Image, 0, 0);
+            if (_bitmap_for_print == null)
+                return;
+
+            e.Graphics.DrawImage(_bitmap_for_print, 0, 0);
         }
 
         private void numericUpDownDPI_ValueChanged(object sender, EventArgs e)
         {
             encodeToPictureBox();
         }
-        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             encodeToPictureBox();
         }
 
-        private void radioButton_size_CheckedChanged(object sender, EventArgs e)
-        {
-            if (radioButton_mm.Checked)
-            {
-                numericUpDownSize.Maximum = 100;
-                numericUpDownSize.Increment = 1;
-            }
-            else
-            {
-                numericUpDownSize.Maximum = 4;
-                numericUpDownSize.Increment = new Decimal(0.5);
-            }
 
+        private void comboBoxQuiteZone_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            encodeToPictureBox();
         }
 
+
+        private void comboBoxSizeUnit_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            double val = (double)numericUpDownSize.Value;
+            switch (comboBoxSizeUnit.Text)
+            {
+                case "mm":
+                    numericUpDownSize.Maximum = 100;
+                    numericUpDownSize.Increment = 1;
+                    numericUpDownSize.ValueChanged -= numericUpDownSize_ValueChanged;
+                    numericUpDownSize.Value = (decimal)UnitsNet.Length.FromInches(val).Millimeters;
+                    encodeToPictureBox();
+                    numericUpDownSize.ValueChanged += numericUpDownSize_ValueChanged;
+
+                    break;
+                case "in":
+                    numericUpDownSize.ValueChanged -= numericUpDownSize_ValueChanged;
+                    numericUpDownSize.Value = (decimal)UnitsNet.Length.FromMillimeters(val).Inches; ;
+                    numericUpDownSize.Maximum = 4;
+                    numericUpDownSize.Increment = 0.5M;
+                    encodeToPictureBox();
+                    numericUpDownSize.ValueChanged += numericUpDownSize_ValueChanged;
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void numericUpDownSize_ValueChanged(object sender, EventArgs e)
+        {
+            encodeToPictureBox();
+        }
+
+        private void comboBoxCorrectionLevel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            encodeToPictureBox();
+        }
 
 
     }
