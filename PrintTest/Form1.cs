@@ -44,6 +44,8 @@ namespace PrintTest
         {
             InitializeComponent();
 
+            var sm = SerialNumber.Machine_ID;
+
             string serial_number = SerialNumber.BuildSerial(5);
 
             _dic_error_correction.Add('L', ErrorCorrectionLevel.L); // 7%
