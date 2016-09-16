@@ -47,17 +47,36 @@ namespace PrintTest
                         ManufacturingStore_DataDataContext dc = new ManufacturingStore_DataDataContext(_db_con_str.ConnectionString);
                         try
                         {
-                            _machine_id = dc.TestStationMachines.Where(m => m.Name == Environment.MachineName).Select(s => s.Id).Single<int>();
+
+                            // Set machine id
+                            // This is commented out because we are updating data below
+                            //_machine_id = dc.TestStationMachines.Where(m => m.Name == Environment.MachineName).Select(s => s.Id).Single<int>();
+
+                            // Machine guid column was added after data had already been inserted
+                            // Update data
+                            TestStationMachine machine = dc.TestStationMachines.Single<TestStationMachine>(m => m.Name == Environment.MachineName);
+                            _machine_id = machine.Id;
+                            try
+                            {
+                                // Update machine GUI if null
+                                if (machine.MachineGuid == null)
+                                {
+                                    machine.MachineGuid = GetMachineGuid();
+                                    dc.SubmitChanges();
+                                }
+                            }
+                            catch (Exception ex) { string m = ex.Message; };
                         }
                         catch { };
+
                         if (_machine_id < 0)
                         {
-                            insertMachine();
-                            _machine_id = dc.TestStationMachines.Where(m => m.Name == Environment.MachineName).Select(s => s.Id).Single<int>();
+                            _machine_id = insertMachine();
                         }
                     }
                     catch (Exception ex) { string msg = ex.Message; };
                 }
+
                 return _machine_id;
             }
         }
@@ -65,7 +84,7 @@ namespace PrintTest
         /// <summary>
         /// Gets the week number based on database current date
         /// </summary>
-        /// <returns>week number of -1</returns>
+        /// <returns>4 digit week + year string</returns>
         static string getWeekYearNumber()
         {
             string weekyear_num = null;
@@ -153,7 +172,15 @@ namespace PrintTest
             machine.IpAddress = ip_str;
             machine.MacAddress = macaddr_str;
             machine.Description = description;
-            machine.MachineGuid = GetMachineGuid();
+            try
+            {
+                string machineguid = GetMachineGuid();
+                // Database should default to "00000000-0000-0000-0000-000000000000"
+                // Just check to make sure we got the same length
+                if (machineguid.Length <= 36)
+                    machine.MachineGuid = machineguid;
+            }
+            catch { };
 
             dc.TestStationMachines.InsertOnSubmit(machine);
             dc.SubmitChanges();
@@ -217,6 +244,10 @@ namespace PrintTest
             return myInterfaceAddress;
         }
 
+        /// <summary>
+        /// Gets the machine gui id stored in the registry
+        /// </summary>
+        /// <returns></returns>
         public static string GetMachineGuid()
         {
             string location = @"SOFTWARE\Microsoft\Cryptography";

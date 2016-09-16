@@ -646,7 +646,7 @@ namespace PrintTest
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MachineGuid", DbType="NChar(36) NOT NULL", CanBeNull=false)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MachineGuid", DbType="NChar(36)")]
 		public string MachineGuid
 		{
 			get

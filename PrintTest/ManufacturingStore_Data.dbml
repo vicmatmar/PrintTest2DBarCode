@@ -28,7 +28,7 @@
       <Column Name="Description" Type="System.String" DbType="VarChar(100) NOT NULL" CanBeNull="false" />
       <Column Name="MacAddress" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
       <Column Name="IpAddress" Type="System.String" DbType="VarChar(15) NOT NULL" CanBeNull="false" />
-      <Column Name="MachineGuid" Type="System.String" DbType="NChar(36) NOT NULL" CanBeNull="false" />
+      <Column Name="MachineGuid" Type="System.String" DbType="NChar(36)" CanBeNull="true" />
     </Type>
   </Table>
 </Database>
