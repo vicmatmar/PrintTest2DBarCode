@@ -33,8 +33,7 @@
             this.numericUpDownSize = new System.Windows.Forms.NumericUpDown();
             this.numericUpDownDPI = new System.Windows.Forms.NumericUpDown();
             this.buttonPrint = new System.Windows.Forms.Button();
-            this.printDialog1 = new System.Windows.Forms.PrintDialog();
-            this.printDocument1 = new System.Drawing.Printing.PrintDocument();
+            this.printDialog = new System.Windows.Forms.PrintDialog();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
@@ -45,6 +44,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.comboBoxSizeUnit = new System.Windows.Forms.ComboBox();
             this.textBoxData = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDPI)).BeginInit();
@@ -120,7 +120,7 @@
             // 
             // buttonPrint
             // 
-            this.buttonPrint.Location = new System.Drawing.Point(93, 321);
+            this.buttonPrint.Location = new System.Drawing.Point(93, 319);
             this.buttonPrint.Name = "buttonPrint";
             this.buttonPrint.Size = new System.Drawing.Size(75, 23);
             this.buttonPrint.TabIndex = 2;
@@ -128,13 +128,9 @@
             this.buttonPrint.UseVisualStyleBackColor = true;
             this.buttonPrint.Click += new System.EventHandler(this.buttonPrint_Click);
             // 
-            // printDialog1
+            // printDialog
             // 
-            this.printDialog1.UseEXDialog = true;
-            // 
-            // printDocument1
-            // 
-            this.printDocument1.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument1_PrintPage);
+            this.printDialog.UseEXDialog = true;
             // 
             // groupBox1
             // 
@@ -264,11 +260,22 @@
             this.textBoxData.TabIndex = 0;
             this.textBoxData.Text = "12345678901234567890";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(199, 318);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 11;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(505, 378);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.textBoxData);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.buttonPrint);
@@ -295,8 +302,7 @@
         private System.Windows.Forms.NumericUpDown numericUpDownSize;
         private System.Windows.Forms.NumericUpDown numericUpDownDPI;
         private System.Windows.Forms.Button buttonPrint;
-        private System.Windows.Forms.PrintDialog printDialog1;
-        private System.Drawing.Printing.PrintDocument printDocument1;
+        private System.Windows.Forms.PrintDialog printDialog;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBoxData;
@@ -307,6 +313,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox comboBoxSizeUnit;
+        private System.Windows.Forms.Button button1;
     }
 }
 

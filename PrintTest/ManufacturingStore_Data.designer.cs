@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PrintTest
+namespace PowerCalibration
 {
 	using System.Data.Linq;
 	using System.Data.Linq.Mapping;
@@ -22,61 +22,53 @@ namespace PrintTest
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="ManufacturingStore_RAD")]
-	public partial class ManufacturingStore_DataDataContext : System.Data.Linq.DataContext
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="ManufacturingStore_v2")]
+	public partial class ManufacturingStore_DataContext : System.Data.Linq.DataContext
 	{
 		
 		private static System.Data.Linq.Mapping.MappingSource mappingSource = new AttributeMappingSource();
 		
     #region Extensibility Method Definitions
     partial void OnCreated();
-    partial void InsertProductionSite(ProductionSite instance);
-    partial void UpdateProductionSite(ProductionSite instance);
-    partial void DeleteProductionSite(ProductionSite instance);
     partial void InsertStationSite(StationSite instance);
     partial void UpdateStationSite(StationSite instance);
     partial void DeleteStationSite(StationSite instance);
     partial void InsertTestStationMachine(TestStationMachine instance);
     partial void UpdateTestStationMachine(TestStationMachine instance);
     partial void DeleteTestStationMachine(TestStationMachine instance);
+    partial void InsertProductionSite(ProductionSite instance);
+    partial void UpdateProductionSite(ProductionSite instance);
+    partial void DeleteProductionSite(ProductionSite instance);
     #endregion
 		
-		public ManufacturingStore_DataDataContext() : 
-				base(global::PrintTest.Properties.Settings.Default.ManufacturingStore_RADConnectionString, mappingSource)
+		public ManufacturingStore_DataContext() : 
+				base(global::PrintTest.Properties.Settings.Default.DBConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public ManufacturingStore_DataDataContext(string connection) : 
+		public ManufacturingStore_DataContext(string connection) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public ManufacturingStore_DataDataContext(System.Data.IDbConnection connection) : 
+		public ManufacturingStore_DataContext(System.Data.IDbConnection connection) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public ManufacturingStore_DataDataContext(string connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
+		public ManufacturingStore_DataContext(string connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public ManufacturingStore_DataDataContext(System.Data.IDbConnection connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
+		public ManufacturingStore_DataContext(System.Data.IDbConnection connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
-		}
-		
-		public System.Data.Linq.Table<ProductionSite> ProductionSites
-		{
-			get
-			{
-				return this.GetTable<ProductionSite>();
-			}
 		}
 		
 		public System.Data.Linq.Table<StationSite> StationSites
@@ -94,287 +86,13 @@ namespace PrintTest
 				return this.GetTable<TestStationMachine>();
 			}
 		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ProductionSite")]
-	public partial class ProductionSite : INotifyPropertyChanging, INotifyPropertyChanged
-	{
 		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _Id;
-		
-		private string _Name;
-		
-		private bool _LoadRangeTest;
-		
-		private bool _RunIct;
-		
-		private bool _RunRangeTest;
-		
-		private bool _LoadApplication;
-		
-		private bool _ForceChannel;
-		
-		private bool _Erase;
-		
-		private bool _EnableFirmwareChange;
-		
-		private EntitySet<StationSite> _StationSites;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIdChanging(int value);
-    partial void OnIdChanged();
-    partial void OnNameChanging(string value);
-    partial void OnNameChanged();
-    partial void OnLoadRangeTestChanging(bool value);
-    partial void OnLoadRangeTestChanged();
-    partial void OnRunIctChanging(bool value);
-    partial void OnRunIctChanged();
-    partial void OnRunRangeTestChanging(bool value);
-    partial void OnRunRangeTestChanged();
-    partial void OnLoadApplicationChanging(bool value);
-    partial void OnLoadApplicationChanged();
-    partial void OnForceChannelChanging(bool value);
-    partial void OnForceChannelChanged();
-    partial void OnEraseChanging(bool value);
-    partial void OnEraseChanged();
-    partial void OnEnableFirmwareChangeChanging(bool value);
-    partial void OnEnableFirmwareChangeChanged();
-    #endregion
-		
-		public ProductionSite()
-		{
-			this._StationSites = new EntitySet<StationSite>(new Action<StationSite>(this.attach_StationSites), new Action<StationSite>(this.detach_StationSites));
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", DbType="Int NOT NULL", IsPrimaryKey=true)]
-		public int Id
+		public System.Data.Linq.Table<ProductionSite> ProductionSites
 		{
 			get
 			{
-				return this._Id;
+				return this.GetTable<ProductionSite>();
 			}
-			set
-			{
-				if ((this._Id != value))
-				{
-					this.OnIdChanging(value);
-					this.SendPropertyChanging();
-					this._Id = value;
-					this.SendPropertyChanged("Id");
-					this.OnIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Name", DbType="VarChar(50) NOT NULL", CanBeNull=false)]
-		public string Name
-		{
-			get
-			{
-				return this._Name;
-			}
-			set
-			{
-				if ((this._Name != value))
-				{
-					this.OnNameChanging(value);
-					this.SendPropertyChanging();
-					this._Name = value;
-					this.SendPropertyChanged("Name");
-					this.OnNameChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LoadRangeTest", DbType="Bit NOT NULL")]
-		public bool LoadRangeTest
-		{
-			get
-			{
-				return this._LoadRangeTest;
-			}
-			set
-			{
-				if ((this._LoadRangeTest != value))
-				{
-					this.OnLoadRangeTestChanging(value);
-					this.SendPropertyChanging();
-					this._LoadRangeTest = value;
-					this.SendPropertyChanged("LoadRangeTest");
-					this.OnLoadRangeTestChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RunIct", DbType="Bit NOT NULL")]
-		public bool RunIct
-		{
-			get
-			{
-				return this._RunIct;
-			}
-			set
-			{
-				if ((this._RunIct != value))
-				{
-					this.OnRunIctChanging(value);
-					this.SendPropertyChanging();
-					this._RunIct = value;
-					this.SendPropertyChanged("RunIct");
-					this.OnRunIctChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RunRangeTest", DbType="Bit NOT NULL")]
-		public bool RunRangeTest
-		{
-			get
-			{
-				return this._RunRangeTest;
-			}
-			set
-			{
-				if ((this._RunRangeTest != value))
-				{
-					this.OnRunRangeTestChanging(value);
-					this.SendPropertyChanging();
-					this._RunRangeTest = value;
-					this.SendPropertyChanged("RunRangeTest");
-					this.OnRunRangeTestChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LoadApplication", DbType="Bit NOT NULL")]
-		public bool LoadApplication
-		{
-			get
-			{
-				return this._LoadApplication;
-			}
-			set
-			{
-				if ((this._LoadApplication != value))
-				{
-					this.OnLoadApplicationChanging(value);
-					this.SendPropertyChanging();
-					this._LoadApplication = value;
-					this.SendPropertyChanged("LoadApplication");
-					this.OnLoadApplicationChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ForceChannel", DbType="Bit NOT NULL")]
-		public bool ForceChannel
-		{
-			get
-			{
-				return this._ForceChannel;
-			}
-			set
-			{
-				if ((this._ForceChannel != value))
-				{
-					this.OnForceChannelChanging(value);
-					this.SendPropertyChanging();
-					this._ForceChannel = value;
-					this.SendPropertyChanged("ForceChannel");
-					this.OnForceChannelChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Erase", DbType="Bit NOT NULL")]
-		public bool Erase
-		{
-			get
-			{
-				return this._Erase;
-			}
-			set
-			{
-				if ((this._Erase != value))
-				{
-					this.OnEraseChanging(value);
-					this.SendPropertyChanging();
-					this._Erase = value;
-					this.SendPropertyChanged("Erase");
-					this.OnEraseChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EnableFirmwareChange", DbType="Bit NOT NULL")]
-		public bool EnableFirmwareChange
-		{
-			get
-			{
-				return this._EnableFirmwareChange;
-			}
-			set
-			{
-				if ((this._EnableFirmwareChange != value))
-				{
-					this.OnEnableFirmwareChangeChanging(value);
-					this.SendPropertyChanging();
-					this._EnableFirmwareChange = value;
-					this.SendPropertyChanged("EnableFirmwareChange");
-					this.OnEnableFirmwareChangeChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProductionSite_StationSite", Storage="_StationSites", ThisKey="Id", OtherKey="ProductionSiteId")]
-		public EntitySet<StationSite> StationSites
-		{
-			get
-			{
-				return this._StationSites;
-			}
-			set
-			{
-				this._StationSites.Assign(value);
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_StationSites(StationSite entity)
-		{
-			this.SendPropertyChanging();
-			entity.ProductionSite = this;
-		}
-		
-		private void detach_StationSites(StationSite entity)
-		{
-			this.SendPropertyChanging();
-			entity.ProductionSite = null;
 		}
 	}
 	
@@ -684,6 +402,288 @@ namespace PrintTest
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ProductionSite")]
+	public partial class ProductionSite : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _Id;
+		
+		private string _Name;
+		
+		private bool _LoadRangeTest;
+		
+		private bool _RunIct;
+		
+		private bool _RunRangeTest;
+		
+		private bool _LoadApplication;
+		
+		private bool _ForceChannel;
+		
+		private bool _Erase;
+		
+		private bool _EnableFirmwareChange;
+		
+		private EntitySet<StationSite> _StationSites;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnNameChanging(string value);
+    partial void OnNameChanged();
+    partial void OnLoadRangeTestChanging(bool value);
+    partial void OnLoadRangeTestChanged();
+    partial void OnRunIctChanging(bool value);
+    partial void OnRunIctChanged();
+    partial void OnRunRangeTestChanging(bool value);
+    partial void OnRunRangeTestChanged();
+    partial void OnLoadApplicationChanging(bool value);
+    partial void OnLoadApplicationChanged();
+    partial void OnForceChannelChanging(bool value);
+    partial void OnForceChannelChanged();
+    partial void OnEraseChanging(bool value);
+    partial void OnEraseChanged();
+    partial void OnEnableFirmwareChangeChanging(bool value);
+    partial void OnEnableFirmwareChangeChanged();
+    #endregion
+		
+		public ProductionSite()
+		{
+			this._StationSites = new EntitySet<StationSite>(new Action<StationSite>(this.attach_StationSites), new Action<StationSite>(this.detach_StationSites));
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", DbType="Int NOT NULL", IsPrimaryKey=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Name", DbType="VarChar(50) NOT NULL", CanBeNull=false)]
+		public string Name
+		{
+			get
+			{
+				return this._Name;
+			}
+			set
+			{
+				if ((this._Name != value))
+				{
+					this.OnNameChanging(value);
+					this.SendPropertyChanging();
+					this._Name = value;
+					this.SendPropertyChanged("Name");
+					this.OnNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LoadRangeTest", DbType="Bit NOT NULL")]
+		public bool LoadRangeTest
+		{
+			get
+			{
+				return this._LoadRangeTest;
+			}
+			set
+			{
+				if ((this._LoadRangeTest != value))
+				{
+					this.OnLoadRangeTestChanging(value);
+					this.SendPropertyChanging();
+					this._LoadRangeTest = value;
+					this.SendPropertyChanged("LoadRangeTest");
+					this.OnLoadRangeTestChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RunIct", DbType="Bit NOT NULL")]
+		public bool RunIct
+		{
+			get
+			{
+				return this._RunIct;
+			}
+			set
+			{
+				if ((this._RunIct != value))
+				{
+					this.OnRunIctChanging(value);
+					this.SendPropertyChanging();
+					this._RunIct = value;
+					this.SendPropertyChanged("RunIct");
+					this.OnRunIctChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RunRangeTest", DbType="Bit NOT NULL")]
+		public bool RunRangeTest
+		{
+			get
+			{
+				return this._RunRangeTest;
+			}
+			set
+			{
+				if ((this._RunRangeTest != value))
+				{
+					this.OnRunRangeTestChanging(value);
+					this.SendPropertyChanging();
+					this._RunRangeTest = value;
+					this.SendPropertyChanged("RunRangeTest");
+					this.OnRunRangeTestChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LoadApplication", DbType="Bit NOT NULL")]
+		public bool LoadApplication
+		{
+			get
+			{
+				return this._LoadApplication;
+			}
+			set
+			{
+				if ((this._LoadApplication != value))
+				{
+					this.OnLoadApplicationChanging(value);
+					this.SendPropertyChanging();
+					this._LoadApplication = value;
+					this.SendPropertyChanged("LoadApplication");
+					this.OnLoadApplicationChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ForceChannel", DbType="Bit NOT NULL")]
+		public bool ForceChannel
+		{
+			get
+			{
+				return this._ForceChannel;
+			}
+			set
+			{
+				if ((this._ForceChannel != value))
+				{
+					this.OnForceChannelChanging(value);
+					this.SendPropertyChanging();
+					this._ForceChannel = value;
+					this.SendPropertyChanged("ForceChannel");
+					this.OnForceChannelChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Erase", DbType="Bit NOT NULL")]
+		public bool Erase
+		{
+			get
+			{
+				return this._Erase;
+			}
+			set
+			{
+				if ((this._Erase != value))
+				{
+					this.OnEraseChanging(value);
+					this.SendPropertyChanging();
+					this._Erase = value;
+					this.SendPropertyChanged("Erase");
+					this.OnEraseChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EnableFirmwareChange", DbType="Bit NOT NULL")]
+		public bool EnableFirmwareChange
+		{
+			get
+			{
+				return this._EnableFirmwareChange;
+			}
+			set
+			{
+				if ((this._EnableFirmwareChange != value))
+				{
+					this.OnEnableFirmwareChangeChanging(value);
+					this.SendPropertyChanging();
+					this._EnableFirmwareChange = value;
+					this.SendPropertyChanged("EnableFirmwareChange");
+					this.OnEnableFirmwareChangeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProductionSite_StationSite", Storage="_StationSites", ThisKey="Id", OtherKey="ProductionSiteId")]
+		public EntitySet<StationSite> StationSites
+		{
+			get
+			{
+				return this._StationSites;
+			}
+			set
+			{
+				this._StationSites.Assign(value);
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_StationSites(StationSite entity)
+		{
+			this.SendPropertyChanging();
+			entity.ProductionSite = this;
+		}
+		
+		private void detach_StationSites(StationSite entity)
+		{
+			this.SendPropertyChanging();
+			entity.ProductionSite = null;
 		}
 	}
 }
