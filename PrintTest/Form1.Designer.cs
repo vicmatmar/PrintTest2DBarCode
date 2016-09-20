@@ -45,6 +45,7 @@
             this.comboBoxSizeUnit = new System.Windows.Forms.ComboBox();
             this.textBoxData = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.comboBoxProducts = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDPI)).BeginInit();
@@ -270,11 +271,22 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // comboBoxProducts
+            // 
+            this.comboBoxProducts.FormattingEnabled = true;
+            this.comboBoxProducts.Location = new System.Drawing.Point(199, 286);
+            this.comboBoxProducts.Name = "comboBoxProducts";
+            this.comboBoxProducts.Size = new System.Drawing.Size(290, 21);
+            this.comboBoxProducts.TabIndex = 14;
+            this.comboBoxProducts.SelectedIndexChanged += new System.EventHandler(this.comboBoxProducts_SelectedIndexChanged);
+            this.comboBoxProducts.Format += new System.Windows.Forms.ListControlConvertEventHandler(this.comboBoxProducts_Format);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(505, 378);
+            this.ClientSize = new System.Drawing.Size(509, 378);
+            this.Controls.Add(this.comboBoxProducts);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBoxData);
             this.Controls.Add(this.groupBox1);
@@ -284,6 +296,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDPI)).EndInit();
@@ -314,6 +327,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox comboBoxSizeUnit;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ComboBox comboBoxProducts;
     }
 }
 

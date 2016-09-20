@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 
 using Microsoft.Win32;
+using PrintTest;
 
 namespace PowerCalibration
 {
@@ -19,6 +20,9 @@ namespace PowerCalibration
         // The connection string
         static SqlConnectionStringBuilder _constr = new SqlConnectionStringBuilder(PrintTest.Properties.Settings.Default.DBConnectionString);
         public static SqlConnectionStringBuilder ConnectionSB { get { return _constr; } set { _constr = value; } }
+        
+        static ManufacturingStore_DataContext _dc = new ManufacturingStore_DataContext(ConnectionSB.ConnectionString);
+        public static ManufacturingStore_DataContext DC { get { return _dc; } }
 
         // The site id is cached
         static int _site_id = -1;
@@ -31,8 +35,7 @@ namespace PowerCalibration
                     try
                     {
                         string macaddr_str = GetMacAndIpAddress().Item1;
-                        ManufacturingStore_DataContext dc = new ManufacturingStore_DataContext(ConnectionSB.ConnectionString);
-                        _site_id = dc.StationSites.Where(d => d.StationMac == macaddr_str).Select(s => s.ProductionSiteId).Single<int>();
+                        _site_id = _dc.StationSites.Where(d => d.StationMac == macaddr_str).Select(s => s.ProductionSiteId).Single<int>();
                     }
                     catch { };
                 }
@@ -50,7 +53,6 @@ namespace PowerCalibration
                 {
                     try
                     {
-                        ManufacturingStore_DataContext dc = new ManufacturingStore_DataContext(ConnectionSB.ConnectionString);
                         try
                         {
 
@@ -60,7 +62,7 @@ namespace PowerCalibration
 
                             // Machine guid column was added after data had already been inserted
                             // Update data
-                            TestStationMachine machine = dc.TestStationMachines.Single<TestStationMachine>(m => m.Name == Environment.MachineName);
+                            TestStationMachine machine = _dc.TestStationMachines.Single<TestStationMachine>(m => m.Name == Environment.MachineName);
                             _machine_id = machine.Id;
                             try
                             {
@@ -68,7 +70,7 @@ namespace PowerCalibration
                                 if (machine.MachineGuid == null)
                                 {
                                     machine.MachineGuid = GetMachineGuid();
-                                    dc.SubmitChanges();
+                                    _dc.SubmitChanges();
                                 }
                             }
                             catch (Exception ex) { string m = ex.Message; };
@@ -138,8 +140,6 @@ namespace PowerCalibration
             string macaddr_str = mac_ip.Item1;
             string ip_str = mac_ip.Item2;
 
-            ManufacturingStore_DataContext dc = new ManufacturingStore_DataContext(ConnectionSB.ConnectionString);
-
             string description = null;
             try { description = GetComputerDescription(); }
             catch (Exception) { };
@@ -149,7 +149,7 @@ namespace PowerCalibration
                 string production_site_name = null;
                 try
                 {
-                    var ss = dc.StationSites.Where(d => d.StationMac == macaddr_str).Single();
+                    var ss = _dc.StationSites.Where(d => d.StationMac == macaddr_str).Single();
                     production_site_name = ss.ProductionSite.Name;
                 }
                 catch (Exception) { };
@@ -177,8 +177,8 @@ namespace PowerCalibration
             }
             catch { };
 
-            dc.TestStationMachines.InsertOnSubmit(machine);
-            dc.SubmitChanges();
+            _dc.TestStationMachines.InsertOnSubmit(machine);
+            _dc.SubmitChanges();
 
             return machine.Id;
 

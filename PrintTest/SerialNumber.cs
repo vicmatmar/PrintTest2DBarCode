@@ -19,8 +19,8 @@ namespace PrintTest
         static SqlConnectionStringBuilder _constr = new SqlConnectionStringBuilder(Properties.Settings.Default.DBConnectionString);
         public static SqlConnectionStringBuilder ConnectionSB { get { return _constr; } set { _constr = value; } }
 
-        static PowerCalibration.ManufacturingStore_DataContext _data_context =
-            new PowerCalibration.ManufacturingStore_DataContext(ConnectionSB.ConnectionString);
+        static ManufacturingStore_DataContext _data_context =
+            new ManufacturingStore_DataContext(ConnectionSB.ConnectionString);
 
 
         /// <summary>
@@ -62,10 +62,7 @@ namespace PrintTest
         public static string BuildSerial(int product_id, int serial_num)
         {
 
-            PowerCalibration.ManufacturingStore_DataContext dc =
-                new PowerCalibration.ManufacturingStore_DataContext(ConnectionSB.ConnectionString);
-
-            int teststation_id = dc.TestStationMachines.Where(m => m.Name == Environment.MachineName).Select(s => s.Id).Single<int>();
+            int teststation_id = _data_context.TestStationMachines.Where(m => m.Name == Environment.MachineName).Select(s => s.Id).Single<int>();
 
 
             string week_number = getWeekYearNumber();

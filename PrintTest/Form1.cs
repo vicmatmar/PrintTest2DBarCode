@@ -26,6 +26,8 @@ using UnitsNet;
 
 using PDF417;
 
+using PowerCalibration;
+
 namespace PrintTest
 {
     public partial class Form1 : Form
@@ -39,6 +41,13 @@ namespace PrintTest
         Bitmap _bitmap_for_print;
         Dictionary<char, Gma.QrCodeNet.Encoding.ErrorCorrectionLevel> _dic_error_correction = new Dictionary<char, ErrorCorrectionLevel>();
         Dictionary<char, QuietZoneModules> _dic_quite_zone = new Dictionary<char, QuietZoneModules>();
+
+        class product_desc
+        {
+            public int Id { get; set; }
+            public string ModelString { get; set; }
+            public string Name { get; set; }
+        }
 
         public Form1()
         {
@@ -437,6 +446,30 @@ namespace PrintTest
         private void comboBoxCorrectionLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
             encodeToPictureBox();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+           ManufacturingStore_DataContext dc = Utils.DC;
+
+            product_desc[] products = dc.Products.Select(s => new product_desc { Id = s.Id, Name = s.Name, ModelString = s.ModelString }).OrderBy(s=>s.ModelString).ToArray();
+
+            //comboBoxProducts.DataSource = dc.Products.ToArray();
+            comboBoxProducts.DataSource = products;
+
+        }
+
+        private void comboBoxProducts_Format(object sender, ListControlConvertEventArgs e)
+        {
+            //PowerCalibration.Product product = (PowerCalibration.Product)e.ListItem;
+            product_desc product = (product_desc)e.ListItem;
+            e.Value = string.Format("{0} ( {1} )", product.ModelString, product.Name);
+        }
+
+        private void comboBoxProducts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int test = 1;
+
         }
 
 
