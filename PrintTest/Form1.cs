@@ -236,7 +236,7 @@ namespace PrintTest
                 }
             }
 
-            _bitmap_for_print = encodeToBitMap(data, dim, dpi, correction_level, quite_zone);
+            _bitmap_for_print = encodeToBitMap(data, dim, dpi, dpi, correction_level, quite_zone);
 
             /*
             DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal,
@@ -271,7 +271,8 @@ namespace PrintTest
 
         Bitmap encodeToBitMap(string data,
             double dimension_inches,
-            float dpi = 600,
+            float dpi_x = 600,
+            float dpi_y = 600,
             ErrorCorrectionLevel correction_level = ErrorCorrectionLevel.L,
             QuietZoneModules quite_zone = QuietZoneModules.Zero
             )
@@ -280,15 +281,33 @@ namespace PrintTest
             QrEncoder qrEncoder = new QrEncoder(correction_level);
             QrCode qrCode = qrEncoder.Encode(data);
 
-            int pixels = (int)(dimension_inches * dpi);  // number of pixels
+            // Calculate number of pixels.  Note we use dpi in x direction
+            // but we should probably use whichever is lowest
+            int pixels = (int)(dimension_inches * dpi_x); 
+
+            // Check whether we have enough space
+            //if (pixels < qrCode.Matrix.Width)
+                //throw new Exception("Too small");
+
             ISizeCalculation iSizeCal = new FixedCodeSize(pixels, quite_zone);
 
-            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal,
-                System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
+            DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White);
+            //DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal, System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.LightGray);
+
+
             MemoryStream mem_stream = new MemoryStream();
             dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
             Bitmap bitmap = new Bitmap(mem_stream);
-            bitmap.SetResolution(dpi, dpi);
+            bitmap.SetResolution(dpi_x, dpi_y);
+            // A different way to do the same.  Just incase the bitmap.SetResolution function does not work
+            //System.Windows.Point dpipoint = new System.Windows.Point(dpi, dpi);
+            //BitmapSource bitmapsource = dRenderer.WriteToBitmapSource(qrCode.Matrix, dpipoint);
+            //MemoryStream outStream = new MemoryStream();
+            //BitmapEncoder bitmapencoder = new BmpBitmapEncoder();
+            //BitmapFrame bitmapframe = BitmapFrame.Create(bitmapsource);
+            //bitmapencoder.Frames.Add(bitmapframe);
+            //bitmapencoder.Save(outStream);
+            //Bitmap bitmap = new System.Drawing.Bitmap(outStream);
 
             return bitmap;
         }
@@ -340,8 +359,8 @@ namespace PrintTest
             // Sensor type (0 = Reflective, 1 = See-Through).
 
             int labels_per_page = 6;
-            double label_width = 0.25;
-            float spcae_between_labels = 0;
+            float label_width = 0.25F;
+            float spcae_between_labels = 0.0F;
 
             int product_id = 86;
             int start_serial_number = 0;
@@ -349,25 +368,20 @@ namespace PrintTest
             ErrorCorrectionLevel correction_level = _dic_error_correction[comboBoxCorrectionLevel.Text[0]];
             QuietZoneModules quite_zone = _dic_quite_zone[comboBoxQuiteZone.Text[0]];
 
-            //float dpi = (float)numericUpDownDPI.Value;
-            float dpi = e.Graphics.DpiX;
-
-            //float offset = (label_width + spcae_between_labels) * dpi;
-            int x_offset = 0;
+            float x_offset = 0.0F;
+            e.Graphics.PageUnit = GraphicsUnit.Pixel;
             for (int l = 0; l < labels_per_page; l++)
             {
                 string serial = SerialNumber.BuildSerial(product_id, start_serial_number++);
-                Bitmap bitmap = encodeToBitMap(serial, label_width, dpi, correction_level, quite_zone);
 
-                e.Graphics.DrawImage(bitmap, x_offset, 0);
+                Bitmap bitmap = encodeToBitMap(
+                    serial, label_width, e.Graphics.DpiX, e.Graphics.DpiY, correction_level, quite_zone);
 
+                e.Graphics.DrawImage(bitmap, x_offset, 0.0F);
 
-                // This works printing to "Send to OneNote" but dividing by label count does not make sense to me.
-                x_offset += (int)((label_width + spcae_between_labels) * dpi) / labels_per_page;
-
+                //x_offset += (int)(label_width * 100);  // Use when GraphicsUnit = Display
+                x_offset += (label_width + spcae_between_labels) * e.Graphics.DpiX; // Use when GraphicsUnit = Pixel
             }
-
-
         }
 
         private void numericUpDownDPI_ValueChanged(object sender, EventArgs e)
