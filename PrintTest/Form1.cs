@@ -42,11 +42,12 @@ namespace PrintTest
         Dictionary<char, Gma.QrCodeNet.Encoding.ErrorCorrectionLevel> _dic_error_correction = new Dictionary<char, ErrorCorrectionLevel>();
         Dictionary<char, QuietZoneModules> _dic_quite_zone = new Dictionary<char, QuietZoneModules>();
 
+        // private class used to hold product selection combobox
         class product_desc
         {
-            public int Id { get; set; }
-            public string ModelString { get; set; }
-            public string Name { get; set; }
+            public int Id = 0;
+            public string ModelString = null;
+            public string Name = null;
         }
 
         public Form1()
@@ -56,8 +57,8 @@ namespace PrintTest
             string serial_number = SerialNumber.BuildSerial(5, 1);
 
             _dic_error_correction.Add('L', ErrorCorrectionLevel.L); // 7%
-            _dic_error_correction.Add('Q', ErrorCorrectionLevel.Q); // 25%
             _dic_error_correction.Add('M', ErrorCorrectionLevel.M); // 15%
+            _dic_error_correction.Add('Q', ErrorCorrectionLevel.Q); // 25%
             _dic_error_correction.Add('H', ErrorCorrectionLevel.H); // 30%
 
             _dic_quite_zone.Add('0', QuietZoneModules.Zero);
@@ -256,7 +257,10 @@ namespace PrintTest
             _bitmap_for_print.SetResolution(dpi, dpi);
              * */
 
-            Bitmap pbitmap = new Bitmap(_bitmap_for_print, (int)(_bitmap_for_print.Width * ratio), (int)(_bitmap_for_print.Height * ratio));
+            float zoom_factor = (float)numericUpDownZoomFactor.Value;
+            Bitmap pbitmap = new Bitmap(_bitmap_for_print, 
+                (int)(_bitmap_for_print.Width * ratio * zoom_factor), (int)(_bitmap_for_print.Height * ratio * zoom_factor));
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
             this.pictureBox1.Image = pbitmap;
 
 
@@ -292,11 +296,11 @@ namespace PrintTest
 
             // Calculate number of pixels.  Note we use dpi in x direction
             // but we should probably use whichever is lowest
-            int pixels = (int)(dimension_inches * dpi_x); 
+            int pixels = (int)(dimension_inches * dpi_x);
 
             // Check whether we have enough space
             //if (pixels < qrCode.Matrix.Width)
-                //throw new Exception("Too small");
+            //throw new Exception("Too small");
 
             ISizeCalculation iSizeCal = new FixedCodeSize(pixels, quite_zone);
 
@@ -340,7 +344,7 @@ namespace PrintTest
                 return;
 
             e.Graphics.DrawImage(_bitmap_for_print, 0, 0);
- 
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -379,18 +383,36 @@ namespace PrintTest
 
             float x_offset = 0.0F;
             e.Graphics.PageUnit = GraphicsUnit.Pixel;
+            Bitmap[] bitmap_array = new Bitmap[labels_per_page];
             for (int l = 0; l < labels_per_page; l++)
             {
                 string serial = SerialNumber.BuildSerial(product_id, start_serial_number++);
 
                 Bitmap bitmap = encodeToBitMap(
                     serial, label_width, e.Graphics.DpiX, e.Graphics.DpiY, correction_level, quite_zone);
+                bitmap_array[l] = bitmap;
 
                 e.Graphics.DrawImage(bitmap, x_offset, 0.0F);
 
                 //x_offset += (int)(label_width * 100);  // Use when GraphicsUnit = Display
                 x_offset += (label_width + spcae_between_labels) * e.Graphics.DpiX; // Use when GraphicsUnit = Pixel
             }
+
+            Graphics picture_graphics = pictureBox2.CreateGraphics();
+            picture_graphics.PageUnit = GraphicsUnit.Pixel;
+            float ratio_w = picture_graphics.DpiX / e.Graphics.DpiX;
+            float ratio_h = picture_graphics.DpiY / e.Graphics.DpiY;
+            x_offset = 0;
+            for (int l = 0; l < labels_per_page; l++)
+            {
+
+                Bitmap bitmap = bitmap_array[l];
+                Bitmap pbitmap = new Bitmap(bitmap, (int)(bitmap.Width * ratio_w), (int)(bitmap.Height * ratio_h));
+                picture_graphics.DrawImage(pbitmap, x_offset, 0.0F);
+
+                x_offset += (label_width + spcae_between_labels) * picture_graphics.DpiX; // Use when GraphicsUnit = Pixel
+            }
+
         }
 
         private void numericUpDownDPI_ValueChanged(object sender, EventArgs e)
@@ -450,26 +472,56 @@ namespace PrintTest
 
         private void Form1_Load(object sender, EventArgs e)
         {
-           ManufacturingStore_DataContext dc = Utils.DC;
+            ManufacturingStore_DataContext dc = Utils.DC;
 
-            product_desc[] products = dc.Products.Select(s => new product_desc { Id = s.Id, Name = s.Name, ModelString = s.ModelString }).OrderBy(s=>s.ModelString).ToArray();
-
-            //comboBoxProducts.DataSource = dc.Products.ToArray();
+            product_desc[] products =
+                dc.Products.Select(s =>
+                    new product_desc { Id = s.Id, Name = s.Name, ModelString = s.ModelString }).OrderBy(s => s.ModelString).ToArray();
             comboBoxProducts.DataSource = products;
 
-        }
+            // or to select everything
+            //comboBoxProducts.DataSource = dc.Products.ToArray();
 
+        }
+        /// <summary>
+        /// Format the product combobox selection
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void comboBoxProducts_Format(object sender, ListControlConvertEventArgs e)
         {
             //PowerCalibration.Product product = (PowerCalibration.Product)e.ListItem;
             product_desc product = (product_desc)e.ListItem;
-            e.Value = string.Format("{0} ( {1} )", product.ModelString, product.Name);
+            e.Value = string.Format("{0,-10} ({1})", product.ModelString, product.Name);
         }
 
         private void comboBoxProducts_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int test = 1;
+            product_desc product = (product_desc)comboBoxProducts.SelectedItem;
 
+            string serial = SerialNumber.BuildSerial(product.Id, 1);
+            textBoxData.Text = serial;
+
+            encodeToPictureBox();
+        }
+
+        private void numericUpDownZoomFactor_ValueChanged(object sender, EventArgs e)
+        {
+            float zoom_factor = (float)numericUpDownZoomFactor.Value;
+            if (zoom_factor < 1)
+                numericUpDownZoomFactor.Increment = 0.1M;
+            else
+                numericUpDownZoomFactor.Increment = 1.0M;
+
+            float ratio = pictureBox1.Image.HorizontalResolution / (float)numericUpDownDPI.Value;
+            Bitmap pbitmap = new Bitmap(_bitmap_for_print, (int)(_bitmap_for_print.Width * ratio * zoom_factor), (int)(_bitmap_for_print.Height * ratio * zoom_factor));
+            this.pictureBox1.Image = pbitmap;
+
+        }
+
+        private void textBoxData_TextChanged(object sender, EventArgs e)
+        {
+            encodeToPictureBox();
         }
 
 

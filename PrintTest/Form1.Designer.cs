@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.buttonEncode = new System.Windows.Forms.Button();
             this.numericUpDownSize = new System.Windows.Forms.NumericUpDown();
             this.numericUpDownDPI = new System.Windows.Forms.NumericUpDown();
             this.buttonPrint = new System.Windows.Forms.Button();
             this.printDialog = new System.Windows.Forms.PrintDialog();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.numericUpDownZoomFactor = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -46,35 +46,30 @@
             this.textBoxData = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.comboBoxProducts = new System.Windows.Forms.ComboBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDPI)).BeginInit();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownZoomFactor)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
             this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBox1.Location = new System.Drawing.Point(13, 13);
+            this.pictureBox1.Location = new System.Drawing.Point(27, 19);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(250, 250);
+            this.pictureBox1.Size = new System.Drawing.Size(100, 100);
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
             // 
-            // buttonEncode
-            // 
-            this.buttonEncode.Location = new System.Drawing.Point(12, 319);
-            this.buttonEncode.Name = "buttonEncode";
-            this.buttonEncode.Size = new System.Drawing.Size(75, 23);
-            this.buttonEncode.TabIndex = 1;
-            this.buttonEncode.Text = "&Encode";
-            this.buttonEncode.UseVisualStyleBackColor = true;
-            this.buttonEncode.Click += new System.EventHandler(this.buttonEncode_Click);
-            // 
             // numericUpDownSize
             // 
-            this.numericUpDownSize.DecimalPlaces = 2;
+            this.numericUpDownSize.DecimalPlaces = 3;
             this.numericUpDownSize.Increment = new decimal(new int[] {
             5,
             0,
@@ -135,16 +130,40 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label6);
+            this.groupBox1.Controls.Add(this.comboBoxProducts);
             this.groupBox1.Controls.Add(this.tableLayoutPanel1);
-            this.groupBox1.Location = new System.Drawing.Point(269, 12);
+            this.groupBox1.Controls.Add(this.textBoxData);
+            this.groupBox1.Controls.Add(this.pictureBox1);
+            this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(220, 251);
+            this.groupBox1.Size = new System.Drawing.Size(561, 251);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Settings";
+            // 
+            // numericUpDownZoomFactor
+            // 
+            this.numericUpDownZoomFactor.DecimalPlaces = 2;
+            this.numericUpDownZoomFactor.Location = new System.Drawing.Point(67, 110);
+            this.numericUpDownZoomFactor.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.numericUpDownZoomFactor.Name = "numericUpDownZoomFactor";
+            this.numericUpDownZoomFactor.Size = new System.Drawing.Size(48, 20);
+            this.numericUpDownZoomFactor.TabIndex = 15;
+            this.numericUpDownZoomFactor.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            65536});
+            this.numericUpDownZoomFactor.ValueChanged += new System.EventHandler(this.numericUpDownZoomFactor_ValueChanged);
             // 
             // tableLayoutPanel1
             // 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -158,9 +177,11 @@
             this.tableLayoutPanel1.Controls.Add(this.comboBoxQuiteZone, 1, 6);
             this.tableLayoutPanel1.Controls.Add(this.label4, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.comboBoxSizeUnit, 2, 1);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(13, 19);
+            this.tableLayoutPanel1.Controls.Add(this.label5, 0, 7);
+            this.tableLayoutPanel1.Controls.Add(this.numericUpDownZoomFactor, 1, 7);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(187, 60);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 7;
+            this.tableLayoutPanel1.RowCount = 8;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -168,7 +189,8 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(185, 126);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(290, 141);
             this.tableLayoutPanel1.TabIndex = 13;
             // 
             // label1
@@ -255,11 +277,12 @@
             // 
             // textBoxData
             // 
-            this.textBoxData.Location = new System.Drawing.Point(13, 287);
+            this.textBoxData.Location = new System.Drawing.Point(0, 125);
             this.textBoxData.Name = "textBoxData";
             this.textBoxData.Size = new System.Drawing.Size(165, 20);
             this.textBoxData.TabIndex = 0;
             this.textBoxData.Text = "12345678901234567890";
+            this.textBoxData.TextChanged += new System.EventHandler(this.textBoxData_TextChanged);
             // 
             // button1
             // 
@@ -274,25 +297,49 @@
             // comboBoxProducts
             // 
             this.comboBoxProducts.FormattingEnabled = true;
-            this.comboBoxProducts.Location = new System.Drawing.Point(199, 286);
+            this.comboBoxProducts.Location = new System.Drawing.Point(254, 33);
             this.comboBoxProducts.Name = "comboBoxProducts";
-            this.comboBoxProducts.Size = new System.Drawing.Size(290, 21);
+            this.comboBoxProducts.Size = new System.Drawing.Size(223, 21);
             this.comboBoxProducts.TabIndex = 14;
             this.comboBoxProducts.SelectedIndexChanged += new System.EventHandler(this.comboBoxProducts_SelectedIndexChanged);
             this.comboBoxProducts.Format += new System.Windows.Forms.ListControlConvertEventHandler(this.comboBoxProducts_Format);
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBox2.Location = new System.Drawing.Point(12, 371);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(477, 250);
+            this.pictureBox2.TabIndex = 15;
+            this.pictureBox2.TabStop = false;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 107);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(37, 13);
+            this.label5.TabIndex = 16;
+            this.label5.Text = "Zoom:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(190, 36);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(47, 13);
+            this.label6.TabIndex = 15;
+            this.label6.Text = "Product:";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(509, 378);
-            this.Controls.Add(this.comboBoxProducts);
+            this.ClientSize = new System.Drawing.Size(772, 652);
+            this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.textBoxData);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.buttonPrint);
-            this.Controls.Add(this.buttonEncode);
-            this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "Form1";
             this.Text = "Form1";
@@ -301,17 +348,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDPI)).EndInit();
             this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownZoomFactor)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Button buttonEncode;
         private System.Windows.Forms.NumericUpDown numericUpDownSize;
         private System.Windows.Forms.NumericUpDown numericUpDownDPI;
         private System.Windows.Forms.Button buttonPrint;
@@ -328,6 +376,10 @@
         private System.Windows.Forms.ComboBox comboBoxSizeUnit;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ComboBox comboBoxProducts;
+        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.NumericUpDown numericUpDownZoomFactor;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }
 
