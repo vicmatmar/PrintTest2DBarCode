@@ -36,7 +36,7 @@ namespace PrintTest
         //string _printer_name = "KONICA MINOLTA mc5450 PS";
         //string _printer_name = "Brady IP300 Printer";
 
-        Bitmap _bitmap_for_print;
+        Bitmap[] _bitmaps_for_print;
 
         Dictionary<char, Gma.QrCodeNet.Encoding.ErrorCorrectionLevel> _dic_error_correction = new Dictionary<char, ErrorCorrectionLevel>();
         Dictionary<char, QuietZoneModules> _dic_quite_zone = new Dictionary<char, QuietZoneModules>();
@@ -226,26 +226,34 @@ namespace PrintTest
             float dpi = (float)numericUpDownDPI.Value;
             float pdpi = pictureBox1.CreateGraphics().DpiX;
             float ratio = 1;
-            double dim = (double)numericUpDownSize.Value;
-            if (dim == 0)
+            float dim_inches = (float)numericUpDownSize.Value;
+            if (dim_inches == 0)
             {
                 // Full screen
                 int side = pictureBox1.Height;
                 //side = 100; //=> 1"
                 if (pictureBox1.Height > pictureBox1.Width)
                     side = pictureBox1.Width;
-                dim = side / dpi;
+                dim_inches = side / dpi;
             }
             else
             {
                 ratio = pdpi / dpi;
                 if (comboBoxSizeUnit.Text == "mm")
                 {
-                    dim = Length.FromMillimeters(dim).Inches;
+                    dim_inches = (float)Length.FromMillimeters(dim_inches).Inches;
                 }
             }
 
-            _bitmap_for_print = encodeToBitMap(data, dim, dpi, dpi, correction_level, quite_zone);
+            //_bitmap_for_print = encodeToBitMap(data, dim, dpi, dpi, correction_level, quite_zone);
+
+            product_desc product_desc = (product_desc)this.comboBoxProducts.SelectedItem;
+            int start_serial = 0;
+            int number_of_labels = 6;
+            _bitmaps_for_print = encodeProductToBitMapArray(
+                product_desc.Id, start_serial, dim_inches, number_of_labels, dpi, dpi, correction_level, quite_zone);
+
+            Bitmap _bitmap_for_print = _bitmaps_for_print[0];
 
             /*
             DrawingBrushRenderer dRenderer = new DrawingBrushRenderer(iSizeCal,
@@ -259,7 +267,7 @@ namespace PrintTest
             float zoom_factor = (float)numericUpDownZoomFactor.Value;
             Bitmap pbitmap = new Bitmap(_bitmap_for_print,
                 (int)(_bitmap_for_print.Width * ratio * zoom_factor), (int)(_bitmap_for_print.Height * ratio * zoom_factor));
-            this.pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
+            //this.pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
             this.pictureBox1.Image = pbitmap;
 
 
@@ -273,11 +281,28 @@ namespace PrintTest
             //bitmapencoder.Save(outStream);
             //Bitmap bitmap2 = new System.Drawing.Bitmap(outStream);
 
-
             //PDF417Generator p = new PDF417Generator();
             //Bitmap bitmap2 = p.GeneratePDF417Code(pictureBox2.Height / 4, pictureBox2.Width / 2, textBoxData.Text);
             //bitmap2.SetResolution(300,300);
             //this.pictureBox2.Image = bitmap2;
+
+            pictureBox2.Refresh();
+            float space_between_labels = 0.0F;
+            Graphics picture2_graphics = pictureBox2.CreateGraphics();
+            picture2_graphics.PageUnit = GraphicsUnit.Pixel;
+            float ratio_w = picture2_graphics.DpiX / dpi;
+            float ratio_h = picture2_graphics.DpiY / dpi;
+            float x_offset = 0.0F;
+            for (int l = 0; l < number_of_labels; l++)
+            {
+
+                Bitmap bitmap = _bitmaps_for_print[l];
+                Bitmap p2bitmap = new Bitmap(bitmap, (int)(bitmap.Width * ratio_w), (int)(bitmap.Height * ratio_h));
+                picture2_graphics.DrawImage(p2bitmap, x_offset, 0.0F);
+
+                x_offset += (dim_inches + space_between_labels) * picture2_graphics.DpiX; // Use when GraphicsUnit = Pixel
+            }
+
         }
 
         Bitmap encodeToBitMap(string data,
@@ -343,7 +368,6 @@ namespace PrintTest
             int start_serial_number = 0,
             float label_width = 1.0F,
             int number_of_labels = 1,
-            float spcae_between_labels = 0.0F,
             float dpi_x = 600,
             float dpi_y = 600,
             ErrorCorrectionLevel correction_level = ErrorCorrectionLevel.L,
@@ -365,25 +389,15 @@ namespace PrintTest
             return bitmap_array;
         }
 
-        private void buttonPrint_Click(object sender, EventArgs e)
-        {
-
-            printDialog.Document = new PrintDocument();
-            printDialog.Document.PrintPage += printDocument1_PrintPage;
-            DialogResult r = printDialog.ShowDialog();
-            if (r == DialogResult.OK)
-            {
-                printDialog.Document.Print();
-            }
-
-        }
-
         private void printDocument1_PrintPage(object sender, PrintPageEventArgs e)
         {
-            if (_bitmap_for_print == null)
+            if (_bitmaps_for_print == null)
                 return;
 
-            e.Graphics.DrawImage(_bitmap_for_print, 0, 0);
+            if (_bitmaps_for_print.Length < 1)
+                return;
+
+            e.Graphics.DrawImage(_bitmaps_for_print[0], 0, 0);
 
         }
 
@@ -421,6 +435,7 @@ namespace PrintTest
             ErrorCorrectionLevel correction_level = _dic_error_correction[comboBoxCorrectionLevel.Text[0]];
             QuietZoneModules quite_zone = _dic_quite_zone[comboBoxQuiteZone.Text[0]];
 
+            /*
             float x_offset = 0.0F;
             e.Graphics.PageUnit = GraphicsUnit.Pixel;
             Bitmap[] _bitmap_array = new Bitmap[labels_per_page];
@@ -437,12 +452,25 @@ namespace PrintTest
                 //x_offset += (int)(label_width * 100);  // Use when GraphicsUnit = Display
                 x_offset += (label_width + spcae_between_labels) * e.Graphics.DpiX; // Use when GraphicsUnit = Pixel
             }
+             */
+
+            Bitmap[] _bitmap_array = encodeProductToBitMapArray(product_id, start_serial_number, label_width, labels_per_page, e.Graphics.DpiX, e.Graphics.DpiY, correction_level, quite_zone);
+            float x_offset = 0.0F;
+            e.Graphics.PageUnit = GraphicsUnit.Pixel;
+            for (int l = 0; l < labels_per_page; l++)
+            {
+                e.Graphics.DrawImage(_bitmap_array[l], x_offset, 0.0F);
+
+                //x_offset += (int)(label_width * 100);  // Use when GraphicsUnit = Display
+                x_offset += (label_width + spcae_between_labels) * e.Graphics.DpiX; // Use when GraphicsUnit = Pixel
+            }
+
 
             Graphics picture_graphics = pictureBox2.CreateGraphics();
             picture_graphics.PageUnit = GraphicsUnit.Pixel;
             float ratio_w = picture_graphics.DpiX / e.Graphics.DpiX;
             float ratio_h = picture_graphics.DpiY / e.Graphics.DpiY;
-            x_offset = 0;
+            x_offset = 0.0F;
             for (int l = 0; l < labels_per_page; l++)
             {
 
@@ -539,8 +567,6 @@ namespace PrintTest
 
             string serial = SerialNumber.BuildSerial(product.Id, 1);
             textBoxData.Text = serial;
-
-            encodeToPictureBox();
         }
 
         private void numericUpDownZoomFactor_ValueChanged(object sender, EventArgs e)
@@ -552,7 +578,8 @@ namespace PrintTest
                 numericUpDownZoomFactor.Increment = 1.0M;
 
             float ratio = pictureBox1.Image.HorizontalResolution / (float)numericUpDownDPI.Value;
-            Bitmap pbitmap = new Bitmap(_bitmap_for_print, (int)(_bitmap_for_print.Width * ratio * zoom_factor), (int)(_bitmap_for_print.Height * ratio * zoom_factor));
+            Bitmap bitmap = _bitmaps_for_print[0];
+            Bitmap pbitmap = new Bitmap(bitmap, (int)(bitmap.Width * ratio * zoom_factor), (int)(bitmap.Height * ratio * zoom_factor));
             this.pictureBox1.Image = pbitmap;
 
         }
@@ -560,6 +587,18 @@ namespace PrintTest
         private void textBoxData_TextChanged(object sender, EventArgs e)
         {
             encodeToPictureBox();
+        }
+
+        private void printToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            printDialog.Document = new PrintDocument();
+            printDialog.Document.PrintPage += printDocument1_PrintPage;
+            DialogResult r = printDialog.ShowDialog();
+            if (r == DialogResult.OK)
+            {
+                printDialog.Document.Print();
+            }
+
         }
 
 
