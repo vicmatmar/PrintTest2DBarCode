@@ -24,8 +24,6 @@ using ThoughtWorks.QRCode.Codec;
 
 using UnitsNet;
 
-using PDF417;
-
 using PowerCalibration;
 
 namespace PrintTest
@@ -39,6 +37,7 @@ namespace PrintTest
         //string _printer_name = "Brady IP300 Printer";
 
         Bitmap _bitmap_for_print;
+
         Dictionary<char, Gma.QrCodeNet.Encoding.ErrorCorrectionLevel> _dic_error_correction = new Dictionary<char, ErrorCorrectionLevel>();
         Dictionary<char, QuietZoneModules> _dic_quite_zone = new Dictionary<char, QuietZoneModules>();
 
@@ -258,7 +257,7 @@ namespace PrintTest
              * */
 
             float zoom_factor = (float)numericUpDownZoomFactor.Value;
-            Bitmap pbitmap = new Bitmap(_bitmap_for_print, 
+            Bitmap pbitmap = new Bitmap(_bitmap_for_print,
                 (int)(_bitmap_for_print.Width * ratio * zoom_factor), (int)(_bitmap_for_print.Height * ratio * zoom_factor));
             this.pictureBox1.SizeMode = PictureBoxSizeMode.CenterImage;
             this.pictureBox1.Image = pbitmap;
@@ -280,7 +279,6 @@ namespace PrintTest
             //bitmap2.SetResolution(300,300);
             //this.pictureBox2.Image = bitmap2;
         }
-
 
         Bitmap encodeToBitMap(string data,
             double dimension_inches,
@@ -323,6 +321,48 @@ namespace PrintTest
             //Bitmap bitmap = new System.Drawing.Bitmap(outStream);
 
             return bitmap;
+        }
+
+        /// <summary>
+        /// Encodes a product to an array of bitmaps
+        /// 
+        /// The data is formed by using {product_id}{week_year}{start_serial_number++}
+        /// </summary>
+        /// <param name="product_id"></param>
+        /// <param name="start_serial_number"></param>
+        /// <param name="label_width"></param>
+        /// <param name="number_of_labels"></param>
+        /// <param name="spcae_between_labels"></param>
+        /// <param name="dpi_x"></param>
+        /// <param name="dpi_y"></param>
+        /// <param name="correction_level"></param>
+        /// <param name="quite_zone"></param>
+        /// <returns></returns>
+        Bitmap[] encodeProductToBitMapArray(
+            int product_id = 1,
+            int start_serial_number = 0,
+            float label_width = 1.0F,
+            int number_of_labels = 1,
+            float spcae_between_labels = 0.0F,
+            float dpi_x = 600,
+            float dpi_y = 600,
+            ErrorCorrectionLevel correction_level = ErrorCorrectionLevel.L,
+            QuietZoneModules quite_zone = QuietZoneModules.Zero
+            )
+        {
+            Bitmap[] bitmap_array = new Bitmap[number_of_labels];
+
+            for (int l = 0; l < number_of_labels; l++)
+            {
+                string serial = SerialNumber.BuildSerial(product_id, start_serial_number++);
+
+                Bitmap bitmap = encodeToBitMap(
+                    serial, label_width, dpi_x, dpi_y, correction_level, quite_zone);
+
+                bitmap_array[l] = bitmap;
+            }
+
+            return bitmap_array;
         }
 
         private void buttonPrint_Click(object sender, EventArgs e)
@@ -383,14 +423,14 @@ namespace PrintTest
 
             float x_offset = 0.0F;
             e.Graphics.PageUnit = GraphicsUnit.Pixel;
-            Bitmap[] bitmap_array = new Bitmap[labels_per_page];
+            Bitmap[] _bitmap_array = new Bitmap[labels_per_page];
             for (int l = 0; l < labels_per_page; l++)
             {
                 string serial = SerialNumber.BuildSerial(product_id, start_serial_number++);
 
                 Bitmap bitmap = encodeToBitMap(
                     serial, label_width, e.Graphics.DpiX, e.Graphics.DpiY, correction_level, quite_zone);
-                bitmap_array[l] = bitmap;
+                _bitmap_array[l] = bitmap;
 
                 e.Graphics.DrawImage(bitmap, x_offset, 0.0F);
 
@@ -406,7 +446,7 @@ namespace PrintTest
             for (int l = 0; l < labels_per_page; l++)
             {
 
-                Bitmap bitmap = bitmap_array[l];
+                Bitmap bitmap = _bitmap_array[l];
                 Bitmap pbitmap = new Bitmap(bitmap, (int)(bitmap.Width * ratio_w), (int)(bitmap.Height * ratio_h));
                 picture_graphics.DrawImage(pbitmap, x_offset, 0.0F);
 
@@ -425,12 +465,10 @@ namespace PrintTest
             encodeToPictureBox();
         }
 
-
         private void comboBoxQuiteZone_SelectedIndexChanged(object sender, EventArgs e)
         {
             encodeToPictureBox();
         }
-
 
         private void comboBoxSizeUnit_SelectedIndexChanged(object sender, EventArgs e)
         {
