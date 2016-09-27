@@ -248,10 +248,22 @@ namespace PrintTest
             //_bitmap_for_print = encodeToBitMap(data, dim, dpi, dpi, correction_level, quite_zone);
 
             product_desc product_desc = (product_desc)this.comboBoxProducts.SelectedItem;
-            int start_serial = 0;
+            int product_id = product_desc.Id;
+            int start_serial_number = 0;
             int number_of_labels = 6;
-            _bitmaps_for_print = encodeProductToBitMapArray(
-                product_desc.Id, start_serial, dim_inches, number_of_labels, dpi, dpi, correction_level, quite_zone);
+
+
+            _bitmaps_for_print = new Bitmap[number_of_labels];
+            for (int l = 0; l < number_of_labels; l++)
+            {
+                string serial = SerialNumber.BuildSerial(product_id, start_serial_number++);
+
+                Bitmap bitmap = encodeToBitMap(
+                    serial, dim_inches, dpi, dpi, correction_level, quite_zone);
+
+                _bitmaps_for_print[l] = bitmap;
+            }
+
 
             Bitmap _bitmap_for_print = _bitmaps_for_print[0];
 
@@ -287,22 +299,6 @@ namespace PrintTest
             //this.pictureBox2.Image = bitmap2;
 
             pictureBox2.Refresh();
-            float space_between_labels = 0.0F;
-            Graphics picture2_graphics = pictureBox2.CreateGraphics();
-            picture2_graphics.PageUnit = GraphicsUnit.Pixel;
-            float ratio_w = picture2_graphics.DpiX / dpi;
-            float ratio_h = picture2_graphics.DpiY / dpi;
-            float x_offset = 0.0F;
-            for (int l = 0; l < number_of_labels; l++)
-            {
-
-                Bitmap bitmap = _bitmaps_for_print[l];
-                Bitmap p2bitmap = new Bitmap(bitmap, (int)(bitmap.Width * ratio_w), (int)(bitmap.Height * ratio_h));
-                picture2_graphics.DrawImage(p2bitmap, x_offset, 0.0F);
-
-                x_offset += (dim_inches + space_between_labels) * picture2_graphics.DpiX; // Use when GraphicsUnit = Pixel
-            }
-
         }
 
         Bitmap encodeToBitMap(string data,
@@ -335,6 +331,7 @@ namespace PrintTest
             dRenderer.WriteToStream(qrCode.Matrix, ImageFormatEnum.BMP, mem_stream);
             Bitmap bitmap = new Bitmap(mem_stream);
             bitmap.SetResolution(dpi_x, dpi_y);
+
             // A different way to do the same.  Just incase the bitmap.SetResolution function does not work
             //System.Windows.Point dpipoint = new System.Windows.Point(dpi, dpi);
             //BitmapSource bitmapsource = dRenderer.WriteToBitmapSource(qrCode.Matrix, dpipoint);
@@ -348,46 +345,6 @@ namespace PrintTest
             return bitmap;
         }
 
-        /// <summary>
-        /// Encodes a product to an array of bitmaps
-        /// 
-        /// The data is formed by using {product_id}{week_year}{start_serial_number++}
-        /// </summary>
-        /// <param name="product_id"></param>
-        /// <param name="start_serial_number"></param>
-        /// <param name="label_width"></param>
-        /// <param name="number_of_labels"></param>
-        /// <param name="spcae_between_labels"></param>
-        /// <param name="dpi_x"></param>
-        /// <param name="dpi_y"></param>
-        /// <param name="correction_level"></param>
-        /// <param name="quite_zone"></param>
-        /// <returns></returns>
-        Bitmap[] encodeProductToBitMapArray(
-            int product_id = 1,
-            int start_serial_number = 0,
-            float label_width = 1.0F,
-            int number_of_labels = 1,
-            float dpi_x = 600,
-            float dpi_y = 600,
-            ErrorCorrectionLevel correction_level = ErrorCorrectionLevel.L,
-            QuietZoneModules quite_zone = QuietZoneModules.Zero
-            )
-        {
-            Bitmap[] bitmap_array = new Bitmap[number_of_labels];
-
-            for (int l = 0; l < number_of_labels; l++)
-            {
-                string serial = SerialNumber.BuildSerial(product_id, start_serial_number++);
-
-                Bitmap bitmap = encodeToBitMap(
-                    serial, label_width, dpi_x, dpi_y, correction_level, quite_zone);
-
-                bitmap_array[l] = bitmap;
-            }
-
-            return bitmap_array;
-        }
 
         private void printDocument1_PrintPage(object sender, PrintPageEventArgs e)
         {
@@ -429,8 +386,6 @@ namespace PrintTest
             float label_width = 0.25F;
             float spcae_between_labels = 0.0F;
 
-            int product_id = 86;
-            int start_serial_number = 0;
 
             ErrorCorrectionLevel correction_level = _dic_error_correction[comboBoxCorrectionLevel.Text[0]];
             QuietZoneModules quite_zone = _dic_quite_zone[comboBoxQuiteZone.Text[0]];
@@ -454,12 +409,11 @@ namespace PrintTest
             }
              */
 
-            Bitmap[] _bitmap_array = encodeProductToBitMapArray(product_id, start_serial_number, label_width, labels_per_page, e.Graphics.DpiX, e.Graphics.DpiY, correction_level, quite_zone);
             float x_offset = 0.0F;
             e.Graphics.PageUnit = GraphicsUnit.Pixel;
             for (int l = 0; l < labels_per_page; l++)
             {
-                e.Graphics.DrawImage(_bitmap_array[l], x_offset, 0.0F);
+                e.Graphics.DrawImage(_bitmaps_for_print[l], x_offset, 0.0F);
 
                 //x_offset += (int)(label_width * 100);  // Use when GraphicsUnit = Display
                 x_offset += (label_width + spcae_between_labels) * e.Graphics.DpiX; // Use when GraphicsUnit = Pixel
@@ -474,11 +428,60 @@ namespace PrintTest
             for (int l = 0; l < labels_per_page; l++)
             {
 
-                Bitmap bitmap = _bitmap_array[l];
+                Bitmap bitmap = _bitmaps_for_print[l];
                 Bitmap pbitmap = new Bitmap(bitmap, (int)(bitmap.Width * ratio_w), (int)(bitmap.Height * ratio_h));
                 picture_graphics.DrawImage(pbitmap, x_offset, 0.0F);
 
                 x_offset += (label_width + spcae_between_labels) * picture_graphics.DpiX; // Use when GraphicsUnit = Pixel
+            }
+
+        }
+
+        void printDocument2_PrintPage(object sender, PrintPageEventArgs e)
+        {
+            int labels_per_page = 6;
+            float spcae_between_labels = 0.0F;
+
+            ErrorCorrectionLevel correction_level = _dic_error_correction[comboBoxCorrectionLevel.Text[0]];
+            QuietZoneModules quite_zone = _dic_quite_zone[comboBoxQuiteZone.Text[0]];
+
+            float x_offset = 0.0F;
+            e.Graphics.PageUnit = GraphicsUnit.Pixel;
+            for (int l = 0; l < labels_per_page; l++)
+            {
+                e.Graphics.DrawImage(_bitmaps_for_print[l], x_offset, 0.0F);
+
+                //x_offset += (int)(label_width * 100);  // Use when GraphicsUnit = Display
+
+                x_offset += _bitmaps_for_print[l].Width + (spcae_between_labels * e.Graphics.DpiX); // Use when GraphicsUnit = Pixel
+            }
+
+        
+        }
+
+        private void pictureBox2_Paint(object sender, PaintEventArgs e)
+        {
+
+            float dpi = (float)numericUpDownDPI.Value;
+
+            e.Graphics.PageUnit = GraphicsUnit.Pixel;
+            float ratio_w = e.Graphics.DpiX / dpi;
+            float ratio_h = e.Graphics.DpiY / dpi;
+            float x_offset = 0.0F;
+
+            int labels_per_page = 6;
+            float spcae_between_labels = 0.0F;
+
+            for (int l = 0; l < labels_per_page; l++)
+            {
+                Bitmap bitmap = _bitmaps_for_print[l];
+
+                Bitmap pbitmap = new Bitmap(bitmap, (int)(bitmap.Width * ratio_w), (int)(bitmap.Height * ratio_h));
+                
+                e.Graphics.DrawImage(pbitmap, x_offset, 0.0F);
+
+                float label_width = bitmap.Width;
+                x_offset += pbitmap.Width + (spcae_between_labels * e.Graphics.DpiX);
             }
 
         }
@@ -547,6 +550,15 @@ namespace PrintTest
 
             // or to select everything
             //comboBoxProducts.DataSource = dc.Products.ToArray();
+            foreach (string printer_name in PrinterSettings.InstalledPrinters)
+            {
+                comboBoxPrinters.Items.Add(printer_name);
+            }
+            PrintDocument pdoc = new PrintDocument();
+            comboBoxPrinters.Text = pdoc.PrinterSettings.PrinterName;
+            numericUpDownDPI.Value = pdoc.PrinterSettings.DefaultPageSettings.PrinterResolution.X;
+
+
 
         }
         /// <summary>
@@ -600,6 +612,31 @@ namespace PrintTest
             }
 
         }
+
+        private void printToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            printDialog.Document = new PrintDocument();
+            printDialog.Document.PrintPage += printDocument2_PrintPage;
+            DialogResult r = printDialog.ShowDialog();
+            if (r == DialogResult.OK)
+            {
+                printDialog.Document.Print();
+            }
+
+        }
+
+        private void comboBox1_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+            PrintDocument pdoc = new PrintDocument();
+            pdoc.PrinterSettings.PrinterName = comboBoxPrinters.Text;
+            numericUpDownDPI.Value = pdoc.PrinterSettings.DefaultPageSettings.PrinterResolution.X;
+
+            comboBoxPrinterResolutions.Items.Clear();
+            foreach (var printer_res in pdoc.PrinterSettings.PrinterResolutions)
+                comboBoxPrinterResolutions.Items.Add(printer_res);
+
+        }
+
 
 
     }
